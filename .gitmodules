@@ -1,0 +1,12 @@
+[submodule "poky"]
+	path = poky
+	url = git@github.com:yoctoproject/poky.git
+	branch = scarthgap
+[submodule "meta-bananapi-f3"]
+	path = meta-bananapi-f3
+	url = git@github.com:artyoomi/meta-bananapi-f3.git
+	branch = scarthgap
+[submodule "meta-riscv"]
+	path = meta-riscv
+	url = git@github.com:riscv/meta-riscv.git
+	branch = scarthgap
