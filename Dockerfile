@@ -1,7 +1,5 @@
 FROM ubuntu:22.04
 
-WORKDIR /home/builder/poky
-
 # Dependencies, according to: https://docs.yoctoproject.org/brief-yoctoprojectqs/index.html
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
@@ -37,12 +35,3 @@ RUN apt-get update && \
 
 # Set locale for build
 RUN locale-gen en_US.UTF-8
-
-# Add user for build
-ARG uid=1000
-ARG gid=1000
-RUN groupadd -g ${gid} builder
-RUN useradd -m -u ${uid} -g ${gid} -s /bin/bash builder
-USER builder
-
-ENTRYPOINT [ "/bin/bash" ]
