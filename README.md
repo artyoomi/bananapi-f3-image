@@ -14,6 +14,11 @@ git submodule update
 To create build environment you need to execute following script
 ```sh
 ./wrapper.sh
+source oe-init-build-env
+bitbake-layers add-layer ../../meta-bananapi-f3/
+bitbake-layers add-layer ../../meta-riscv/
+# Edit MACHINE variable in conf/local.conf to "bananapi-f3"
+bitbake bananapi-f3-image
 ```
 it will create Podman container with all dependencies needed to build Yocto
 project.
@@ -22,7 +27,5 @@ project.
 1. Support of commands like bitbake.sh, devtool.sh and so on. They will
 automatically setup build invironment inside of container and run your commands.
 wrapper.sh is temporary solution;
-2. Add proxy container to bypass Yocto servers block in Russia. Planing to use
-https://github.com/thejohnd0e/VLESS-to-HTTP# with own VLESS proxy;
-3. Automatic addition of support layers meta-riscv and meta-bananapi-f3 in
+2. Automatic addition of support layers meta-riscv and meta-bananapi-f3 in
 build.
