@@ -11,8 +11,8 @@ CONT_APP=$(
 COMPOSE_APP='docker compose'
 
 export BUILD_CONT_NAME=builder
-export UID=$(id -u)
-export GID=$(id -g)
+export USER_ID=$(id -u)
+export GROUP_ID=$(id -g)
 export SRCROOT="$(git rev-parse --show-toplevel)"
 
 # Remove last extension (script.sh -> script)
