@@ -4,11 +4,20 @@ for Banana Pi F3 based on Yocto Project.
 
 ## Getting started
 
+### Prerequisites
+1. Docker installed
+2. Docker Compose installed
+3. Current user added to docker group (or you can patch wrapper.sh, if you want)
+
 ### Get submodules
 ```sh
 git submodule init
 git submodule update
 ```
+
+### Setup proxy
+If you need so, you can setup proxy by adding vless.conf to xray-tproxy folder.
+You can read more into xray-tproxy/README.md.
 
 ### Create build environment
 To create build environment you need to execute following script
