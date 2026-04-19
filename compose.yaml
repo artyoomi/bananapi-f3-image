@@ -1,0 +1,15 @@
+services:
+  builder:
+    container_name: ${BUILD_CONT_NAME}
+    build: ./builder
+    user: ${UID}:${GID}
+    environment:
+      HOME: ${SRCROOT}/poky
+    working_dir: ${SRCROOT}/poky
+    volumes:
+      - ${SRCROOT}:${SRCROOT}
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
+    stdin_open: true
+    tty: true
+    command: bash

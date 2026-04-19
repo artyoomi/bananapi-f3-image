@@ -10,3 +10,6 @@
 	path = meta-riscv
 	url = git@github.com:riscv/meta-riscv.git
 	branch = scarthgap
+[submodule "xray-tproxy"]
+	path = xray-tproxy
+	url = git@github.com:artyoomi/xray-tproxy.git

@@ -1,0 +1,9 @@
+include:
+  - path: xray-tproxy/compose.yaml
+    project_directory: xray-tproxy
+
+services:
+  builder:
+    network_mode: "container:xray-tproxy"
+    depends_on:
+      - xray-tproxy

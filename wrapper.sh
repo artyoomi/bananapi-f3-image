@@ -1,16 +1,19 @@
 #!/bin/sh
 
-# <TODO>: add docker support in future
 CONT_APP=$(
-    if hash podman 2>/dev/null; then
-        echo "podman"
+    if hash docker 2>/dev/null; then
+        echo "docker"
     else
         error "No container app found!"
-        error "Install podman first."
+        error "Install docker first."
     fi
 )
-CONT_IMAGE=bpif3-build
-CONT_NAME=bpif3-build
+COMPOSE_APP='docker compose'
+
+export BUILD_CONT_NAME=builder
+export UID=$(id -u)
+export GID=$(id -g)
+export SRCROOT="$(git rev-parse --show-toplevel)"
 
 # Remove last extension (script.sh -> script)
 SCRIPT_ABS_PATH=$(basename $0)
@@ -26,46 +29,47 @@ info() { echo "${1}"; }
 warn() { echo "${YELLOW}${1}${NO_COLOR}"; }
 error() { echo "${RED}${1}${NO_COLOR}"; exit 1; }
 
-info() {
-    echo "$1"
-}
+COMPOSE_BASE='-f compose.yaml'
+COMPOSE_PROXY='-f compose.yaml -f compose.proxy.yaml --profile with-proxy'
 
-error() {
-    # <TODO>: add red color highlighting in future
-    echo "$1"
-    exit 1
-}
+test_availability() {
+    TEST_URL='https://yoctoproject.org/connectivity.html'
 
-confirm_cont_image_presense() {
-    if "${CONT_APP}" image inspect "${CONT_IMAGE}" > /dev/null 2>&1; then
-        warn "Image ${CONT_IMAGE} already exists!"
+    info "Testing connection to: ${TEST_URL}"
+    curl --connect-timeout 2 "${TEST_URL}" >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        warn "Connectivity test failed! Proxy container will be used."
+        NEED_PROXY=1
     else
-        warn "Image ${CONT_IMAGE} not found, building..."
-        ${CONT_APP} image build -t ${CONT_IMAGE} .
+        info "Connectivity test succeed."
+        NEED_PROXY=0
     fi
 }
 
-start_container() {
-    confirm_cont_image_presense
+start_containers() {
+    test_availability
+    if [ ${NEED_PROXY} -eq 0 ]; then
+        ${COMPOSE_APP} ${COMPOSE_BASE} up --detach --build
+    else
+        ${COMPOSE_APP} ${COMPOSE_PROXY} up --detach --build
+    fi
+    ${CONT_APP} attach ${BUILD_CONT_NAME}
 
-    ${CONT_APP} run --interactive --tty \
-        --name "$CONT_NAME" \
-        --user "$(id -u):$(id -g)" --userns=keep-id \
-        --env HOME="$SRCROOT/poky" \
-        --workdir "$SRCROOT/poky" \
-        --volume "$SRCROOT":"$SRCROOT" \
-        "$CONT_IMAGE" \
-        bash -c "$@"
 }
 
-remove_container() {
-    "$CONT_APP" rm --force --volumes "$CONT_NAME" >/dev/null
+remove_containers() {
+    info "Stopping containers..."
+    if [ ${NEED_PROXY} -eq 0 ]; then
+        ${COMPOSE_APP} ${COMPOSE_BASE} down --remove-orphans 2>/dev/null
+    else
+        ${COMPOSE_APP} ${COMPOSE_PROXY} down --remove-orphans 2>/dev/null
+    fi
 }
-trap remove_container EXIT
+trap remove_containers EXIT
 
 case "${BITBAKE_COMMAND}" in
     wrapper)
-        start_container "bash"
+        start_containers
         ;;
     *)
         echo "Unknown command '${BITBAKE_COMMAND}', available commands: wrapper" >&2
