@@ -16,13 +16,15 @@ CONT_NAME=bpif3-build
 SCRIPT_ABS_PATH=$(basename $0)
 BITBAKE_COMMAND=${SCRIPT_ABS_PATH%.*}
 
-# Project root directory
 SRCROOT="$(git rev-parse --show-toplevel)"
 
-debug() {
-    # <TODO>: add yellow color highlighting in future
-    echo "$1"
-}
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NO_COLOR='\033[0m'
+
+info() { echo "${1}"; }
+warn() { echo "${YELLOW}${1}${NO_COLOR}"; }
+error() { echo "${RED}${1}${NO_COLOR}"; exit 1; }
 
 info() {
     echo "$1"
@@ -36,9 +38,9 @@ error() {
 
 confirm_cont_image_presense() {
     if "${CONT_APP}" image inspect "${CONT_IMAGE}" > /dev/null 2>&1; then
-        debug "Image ${CONT_IMAGE} already exists!"
+        warn "Image ${CONT_IMAGE} already exists!"
     else
-        debug "Image ${CONT_IMAGE} not found, building..."
+        warn "Image ${CONT_IMAGE} not found, building..."
         ${CONT_APP} image build -t ${CONT_IMAGE} .
     fi
 }
